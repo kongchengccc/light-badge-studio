@@ -2,8 +2,8 @@
 
 > 上传一段灯牌/升级特效视频 → 自动逆向出它的动态效果 → **文字、头像、字体**变成可编辑的 → 一键出片。
 
-[![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci.yml)
-[![Pages](https://github.com/OWNER/REPO/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/deploy-pages.yml)
+[![CI](https://github.com/kongchengccc/light-badge-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/kongchengccc/light-badge-studio/actions/workflows/ci.yml)
+[![Pages](https://github.com/kongchengccc/light-badge-studio/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/kongchengccc/light-badge-studio/actions/workflows/deploy-pages.yml)
 
 ![预览](docs/screenshot.png)
 
@@ -152,14 +152,12 @@ python3 cli/analyze.py 你的视频.mp4 输出目录
 ```bash
 cd 灯牌工坊
 
-# 方式一：gh（推荐，顺手把仓库也建了）
-gh auth login
-gh repo create light-badge-studio --public --source=. --remote=origin --push
-
-# 方式二：手动
-git remote add origin https://github.com/<你的用户名>/light-badge-studio.git
+# 仓库已建好，直接推
+git remote add origin git@github.com:kongchengccc/light-badge-studio.git
 git push -u origin main
 ```
+
+（这台机器的 SSH 公钥已经绑到 `kongchengccc`，所以走 SSH 不需要 token。）
 
 推上去之后：
 - **CI**（`.github/workflows/ci.yml`）会在每次 push 跑 pytest + 冒烟测试
@@ -169,7 +167,7 @@ git push -u origin main
 - Pages 只放前端，后端地址在 `frontend/js/config.js` 里填：
 
   ```js
-  window.API_BASE = "https://你的后端地址";
+  window.API_BASE = "https://light-badge-studio.onrender.com";  // 换成你后端实际的地址
   ```
 
   填完再推一次，前端就连上后端了
