@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: 安装 ffmpeg / chromium
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg chromium
+      - name: 单元测试
+        run: pytest -q tests
+      - name: 分析器冒烟测试
+        run: python -m tests.smoke

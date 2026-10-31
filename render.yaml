@@ -1,0 +1,13 @@
+# Render 一键部署（后台 https://render.com）
+services:
+  - type: web
+    name: badge-studio
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: LB_STORAGE
+        value: /data
+      - key: CHROME_BIN
+        value: /usr/bin/chromium

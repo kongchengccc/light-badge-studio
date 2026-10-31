@@ -1,0 +1,9 @@
+services:
+  badge-studio:
+    build: .
+    ports: ["8000:8000"]
+    volumes:
+      - ./storage:/data
+    environment:
+      - LB_STORAGE=/data
+    restart: unless-stopped
