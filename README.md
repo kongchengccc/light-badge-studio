@@ -145,6 +145,37 @@ python3 cli/analyze.py 你的视频.mp4 输出目录
 
 ---
 
+## 推到 GitHub
+
+仓库已经 `git init` 并提交好了（`.git` 也在里面），只需要加个远端再推：
+
+```bash
+cd 灯牌工坊
+
+# 方式一：gh（推荐，顺手把仓库也建了）
+gh auth login
+gh repo create light-badge-studio --public --source=. --remote=origin --push
+
+# 方式二：手动
+git remote add origin https://github.com/<你的用户名>/light-badge-studio.git
+git push -u origin main
+```
+
+推上去之后：
+- **CI**（`.github/workflows/ci.yml`）会在每次 push 跑 pytest + 冒烟测试
+- **前端**（`.github/workflows/deploy-pages.yml`）会自动部署到 GitHub Pages，
+  地址在仓库的 Settings → Pages 里能看到
+- **后端**用 Render / Fly 部署（仓库里有 `render.yaml` / `fly.toml`）
+- Pages 只放前端，后端地址在 `frontend/js/config.js` 里填：
+
+  ```js
+  window.API_BASE = "https://你的后端地址";
+  ```
+
+  填完再推一次，前端就连上后端了
+
+---
+
 ## 授权
 
 - 代码：MIT（见 `LICENSE`）
