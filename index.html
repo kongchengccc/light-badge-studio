@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>灯牌工坊 · 视频动态灯牌还原与编辑</title>
+<link rel="icon" href="favicon.svg">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- ============ 上传 / 分析 ============ -->
+<section id="landing">
+  <div class="land-inner">
+    <h1>灯牌工坊</h1>
+    <p class="sub">上传一段<b>灯牌 / 升级特效视频</b>，系统自动逆向出它的动态效果（羽毛摆动、粒子流向、文字样式），
+      并把<b>文字、头像、字体</b>变成可编辑的工程文件。</p>
+
+    <div id="drop" class="drop">
+      <input type="file" id="file" accept="video/*" hidden>
+      <div class="drop-icon">⬆</div>
+      <div class="drop-title">把视频拖到这里，或<span class="link">点击选择</span></div>
+      <div class="drop-hint">支持 mp4 / mov / webm，建议 2～5 秒、960×720 以上</div>
+    </div>
+
+    <div id="progress" class="progress hidden">
+      <div class="bar"><i></i></div>
+      <div class="step">准备中…</div>
+    </div>
+
+    <div id="landingErr" class="err hidden"></div>
+
+    <div class="samples">
+      <div class="samples-title">或者先用内置示例试试：</div>
+      <button class="sample" data-sample="demo">加载示例工程</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 编辑器 ============ -->
+<section id="studio" class="hidden">
+  <header class="topbar">
+    <div class="brand">灯牌工坊</div>
+    <div class="spacer"></div>
+    <div class="meta" id="metaInfo">—</div>
+    <button id="btnNewVideo" class="ghost">换个视频</button>
+    <button id="btnSave" class="ghost">保存工程</button>
+    <button id="btnExport" class="primary">导出视频</button>
+  </header>
+
+  <div class="work">
+    <div class="stage">
+      <div class="stage-inner">
+        <canvas id="c"></canvas>
+        <div class="checker"></div>
+      </div>
+      <div class="stage-bar">
+        <button id="btnPlay" class="round">⏸</button>
+        <input type="range" id="scrub" min="0" max="1000" value="0">
+        <span id="timeLabel" class="mono">0.00s</span>
+        <label class="chk"><input type="checkbox" id="chkAlpha" checked>透明背景</label>
+      </div>
+    </div>
+
+    <aside id="panel">
+      <fieldset>
+        <legend>文字</legend>
+        <label>主文案（回车换行）</label>
+        <textarea id="f_text" rows="2"></textarea>
+        <div class="row"><div><label>字号</label><input type="number" id="f_size" min="12" max="200"></div>
+          <div><label>字距</label><input type="number" id="f_spacing" min="-10" max="30"></div></div>
+        <div class="row"><div><label>最大宽度</label><input type="number" id="f_maxw" min="120" max="1600"></div>
+          <div><label>基线 Y</label><input type="number" id="f_texty" min="0" max="1200"></div></div>
+        <label class="chk"><input type="checkbox" id="f_fit"> 自动填满最大宽度</label>
+        <label>字体</label>
+        <select id="f_font"></select>
+        <input type="file" id="f_fontfile" accept=".ttf,.otf,.woff,.woff2" class="filepick">
+        <label>副标题 / 昵称</label>
+        <input type="text" id="f_sub" placeholder="例如：感谢老板的嘉年华">
+        <div class="row"><div><label>副标题字号</label><input type="number" id="f_subsize" min="10" max="80"></div>
+          <div><label>副标题 Y</label><input type="number" id="f_suby" min="0" max="1200"></div></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>文字配色</legend>
+        <div class="row"><div><label>填充上</label><input type="color" id="f_ftop"></div>
+          <div><label>填充下</label><input type="color" id="f_fbot"></div></div>
+        <div class="row"><div><label>描边色</label><input type="color" id="f_stroke"></div>
+          <div><label>光晕色</label><input type="color" id="f_glow"></div></div>
+        <label>描边粗细 <span class="val" id="v_sw"></span></label><input type="range" id="f_sw" min="0" max="20" step="0.2">
+        <label>字重加粗 <span class="val" id="v_ft"></span></label><input type="range" id="f_fatten" min="0" max="16" step="0.5">
+        <label>光晕强度 <span class="val" id="v_gb"></span></label><input type="range" id="f_gb" min="0" max="40" step="0.5">
+        <label>光晕浓度 <span class="val" id="v_ga"></span></label><input type="range" id="f_galpha" min="0" max="1" step="0.05">
+        <label>阴影 <span class="val" id="v_sh"></span></label><input type="range" id="f_sh" min="0" max="1" step="0.02">
+      </fieldset>
+
+      <fieldset>
+        <legend>头像</legend>
+        <div class="hint" id="avatarInfo">—</div>
+        <input type="file" id="f_avatar" accept="image/*" class="filepick">
+        <label>椭圆位置 X / Y</label>
+        <div class="row"><div><input type="number" id="f_avx"></div><div><input type="number" id="f_avy"></div></div>
+        <div class="row"><div><label>宽</label><input type="number" id="f_avw"></div>
+          <div><label>高</label><input type="number" id="f_avh"></div></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>动态（分析所得）</legend>
+        <label class="chk"><input type="checkbox" id="f_motion"> 羽毛摆动</label>
+        <div class="row"><div><label>周期(秒)</label><input type="number" id="f_mper" min="0.2" max="12" step="0.01"></div>
+          <div><label>幅度</label><input type="number" id="f_mamp" min="0" max="4" step="0.05"></div></div>
+        <label class="chk"><input type="checkbox" id="f_part"> 背景粒子</label>
+        <div class="row"><div><label>速度</label><input type="number" id="f_pspeed" min="0" max="600"></div>
+          <div><label>方向°</label><input type="number" id="f_pangle" min="-180" max="180"></div></div>
+        <div class="row"><div><label>数量</label><input type="number" id="f_pcount" min="0" max="500"></div>
+          <div><label>大小</label><input type="number" id="f_psize" min="0.2" max="4" step="0.1"></div></div>
+        <label class="chk"><input type="checkbox" id="f_shine"> 羽毛流光</label>
+        <div class="row"><div><label>流光强度</label><input type="number" id="f_shamt" min="0" max="1" step="0.02"></div>
+          <div><label>速度</label><input type="number" id="f_shspd" min="0" max="600"></div></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>输出</legend>
+        <div class="row"><div><label>时长(秒)</label><input type="number" id="f_dur" min="0.5" max="15" step="0.1"></div>
+          <div><label>帧率</label><select id="f_fps"><option>24</option><option selected>30</option><option>60</option></select></div></div>
+        <label>画布尺寸</label>
+        <div class="row"><div><input type="number" id="f_cw" min="240" max="1920"></div>
+          <div><input type="number" id="f_ch" min="180" max="1080"></div></div>
+        <div class="btn-row">
+          <button id="b_zip">导出 PNG 序列</button>
+          <button id="b_webm">导出 WebM</button>
+        </div>
+        <div class="btn-row"><button id="b_server" class="primary">服务端渲染 MP4/MOV/GIF</button></div>
+        <div class="hint" id="serverHint">服务端渲染需要后端在线（Chrome + ffmpeg），产出 ProRes 4444 透明 MOV。</div>
+        <div class="hint" id="status"></div>
+      </fieldset>
+    </aside>
+  </div>
+</section>
+
+<!-- ============ 导出弹窗 ============ -->
+<div id="exportModal" class="modal hidden">
+  <div class="modal-box">
+    <h3>服务端渲染</h3>
+    <p class="hint">后端会用无头 Chrome 逐帧渲染，再用 ffmpeg 编码。产物在 <code>storage/projects/&lt;id&gt;/out/</code>。</p>
+    <div class="row"><div><label>文件名</label><input type="text" id="ex_name" value="灯牌"></div></div>
+    <div class="row chk-row">
+      <label class="chk"><input type="checkbox" id="ex_mp4" checked> MP4（黑底）</label>
+      <label class="chk"><input type="checkbox" id="ex_mov" checked> MOV（ProRes4444 + Alpha）★</label>
+      <label class="chk"><input type="checkbox" id="ex_gif"> GIF</label>
+      <label class="chk"><input type="checkbox" id="ex_webm"> WebM</label>
+    </div>
+    <div id="exStatus" class="hint"></div>
+    <div class="btn-row"><button id="ex_cancel" class="ghost">取消</button>
+      <button id="ex_go" class="primary">开始渲染</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="js/config.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/api.js"></script>
+<script src="js/editor.js"></script>
+</body>
+</html>
