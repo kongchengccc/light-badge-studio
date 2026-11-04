@@ -1,8 +1,8 @@
 name: Deploy Pages
 
 on:
-  push:
-    branches: [main]
+  # 需要先在 Settings → Pages 手动启用一次 Pages，
+  # 之后这个工作流才能用官方 API 部署。所以改成手动触发。
   workflow_dispatch:
 
 permissions:

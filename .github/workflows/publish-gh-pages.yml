@@ -29,8 +29,6 @@ jobs:
           if [ -n "${{ vars.API_BASE }}" ]; then
             echo "window.API_BASE = \"${{ vars.API_BASE }}\";" > js/config.js
           fi
-          # 相对路径打开 index.html 时也能正常工作
-          sed -i '' 's|href="css/app.css"|href="css/app.css"|' index.html
       - name: 推送到 gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
