@@ -14,7 +14,7 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt pytest
       - name: 安装 ffmpeg / chromium
         run: |
           sudo apt-get update
@@ -23,3 +23,7 @@ jobs:
         run: pytest -q tests
       - name: 分析器冒烟测试
         run: python -m tests.smoke
+
+      - name: 打印分析结果摘要
+        if: always()
+        run: python -c "import json,glob,os; f=sorted(glob.glob('storage/projects/*/project.json')); print('工程数:',len(f)); [print(' ',os.path.basename(os.path.dirname(x))) for x in f]"
