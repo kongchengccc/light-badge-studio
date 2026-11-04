@@ -1,0 +1,42 @@
+name: Publish to gh-pages branch
+
+# 说明：GITHUB_TOKEN 无权「创建 Pages 站点」（configure-pages 会报
+# "Resource not accessible by integration"），所以这里不改 Pages 设置，
+# 只把前端静态产物推到 gh-pages 分支 —— 你在 Settings → Pages 里把
+# Source 选成 gh-pages / root 就能直接上线，全程只差一次点击。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 准备前端产物
+        run: |
+          cd frontend
+          # 把后端地址写进 config.js（可用仓库变量 API_BASE 覆盖）
+          if [ -n "${{ vars.API_BASE }}" ]; then
+            echo "window.API_BASE = \"${{ vars.API_BASE }}\";" > js/config.js
+          fi
+          # 相对路径打开 index.html 时也能正常工作
+          sed -i '' 's|href="css/app.css"|href="css/app.css"|' index.html
+      - name: 推送到 gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend
+          publish_branch: gh-pages
+          enable_pages: false
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
